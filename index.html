@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Model Canvas - Sistema de Arquivos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --line-color: #000;
+            --text-dark: #111;
+            --placeholder-color: #aaa;
+        }
+
+        body {
+            margin: 0;
+            padding: 10px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-pdf { background-color: #e74c3c; }
+        .btn-save { background-color: #27ae60; }
+        .btn-load { background-color: #2980b9; }
+
+        .canvas-wrapper {
+            width: 290mm;
+            height: 200mm;
+            margin: 0 auto;
+            background-color: white;
+            border: 2px solid var(--line-color);
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title {
+            text-align: center;
+            padding: 15px 10px 5px 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-dark);
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .header-title:empty:before {
+            content: "TÍTULO DO MODELO DE NEGÓCIO";
+            color: var(--placeholder-color);
+        }
+
+        #canvas-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(2, 1fr) 130px;
+            flex-grow: 1;
+        }
+
+        .block {
+            border: 1px solid var(--line-color);
+            padding: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .block::after {
+            content: attr(data-emoji);
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 2.2rem;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .block-title {
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .editable-area {
+            flex-grow: 1;
+            font-size: 0.85rem;
+            outline: none;
+            line-height: 1.4;
+        }
+
+        .editable-area:empty:before {
+            content: attr(data-guide);
+            color: var(--placeholder-color);
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+
+        .editable-area ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        /* GRID MAPPING */
+        .parcerias      { grid-column: span 2; grid-row: span 2; }
+        .atividades     { grid-column: span 2; grid-row: span 1; }
+        .recursos       { grid-column: span 2; grid-row: span 1; }
+        .proposta       { grid-column: span 2; grid-row: span 2; }
+        .relacionamento { grid-column: span 2; grid-row: span 1; }
+        .canais         { grid-column: span 2; grid-row: span 1; }
+        .segmentos      { grid-column: span 2; grid-row: span 2; }
+        .custos         { grid-column: span 5; grid-row: 3; }
+        .receitas       { grid-column: span 5; grid-row: 3; }
+
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="btn-pdf" onclick="exportarPDF()">📂 PDF</button>
+        <button class="btn-save" onclick="salvarJSON()">💾 Salvar JSON</button>
+        <button class="btn-load" onclick="document.getElementById('input-file').click()">📁 Carregar JSON</button>
+        <input type="file" id="input-file" accept=".json" onchange="carregarJSON(event)">
+    </div>
+
+    <div class="canvas-wrapper">
+        <div class="header-title" id="titulo-bmc" contenteditable="true"></div>
+        <div id="canvas-grid">
+            <div class="block parcerias" data-emoji="🤝">
+                <div class="block-title">Parcerias Principais</div>
+                <div class="editable-area" contenteditable="true" data-key="parcerias" data-guide="Quem são nossos parceiros?"></div>
+            </div>
+            <div class="block atividades" data-emoji="🛠️">
+                <div class="block-title">Atividades-Chave</div>
+                <div class="editable-area" contenteditable="true" data-key="atividades" data-guide="O que fazemos diariamente?"></div>
+            </div>
+            <div class="block proposta" data-emoji="💎">
+                <div class="block-title">Proposta de Valor</div>
+                <div class="editable-area" contenteditable="true" data-key="proposta" data-guide="O que oferecemos de único?"></div>
+            </div>
+            <div class="block relacionamento" data-emoji="❤️">
+                <div class="block-title">Relacionamento com Clientes</div>
+                <div class="editable-area" contenteditable="true" data-key="relacionamento" data-guide="Como lidamos com o cliente?"></div>
+            </div>
+            <div class="block segmentos" data-emoji="👥">
+                <div class="block-title">Segmentos de Clientes</div>
+                <div class="editable-area" contenteditable="true" data-key="segmentos" data-guide="Quem é o público-alvo?"></div>
+            </div>
+            <div class="block recursos" data-emoji="💻">
+                <div class="block-title">Recursos Principais</div>
+                <div class="editable-area" contenteditable="true" data-key="recursos" data-guide="O que precisamos para operar?"></div>
+            </div>
+            <div class="block canais" data-emoji="🌐">
+                <div class="block-title">Canais</div>
+                <div class="editable-area" contenteditable="true" data-key="canais" data-guide="Como entregamos o valor?"></div>
+            </div>
+            <div class="block custos" data-emoji="💸">
+                <div class="block-title">Estrutura de Custos</div>
+                <div class="editable-area" contenteditable="true" data-key="custos" data-guide="Quais as maiores despesas?"></div>
+            </div>
+            <div class="block receitas" data-emoji="💰">
+                <div class="block-title">Fontes de Receita</div>
+                <div class="editable-area" contenteditable="true" data-key="receitas" data-guide="Como ganhamos dinheiro?"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tituloEl = document.getElementById('titulo-bmc');
+        const areas = document.querySelectorAll('.editable-area');
+
+        // Garante lista bullets ao focar
+        areas.forEach(block => {
+            block.addEventListener('focus', function() {
+                if (!this.querySelector('ul')) {
+                    this.innerHTML = "<ul><li></li></ul>";
+                    const li = this.querySelector('li');
+                    const range = document.createRange();
+                    const sel = window.getSelection();
+                    range.setStart(li, 0);
+                    range.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            });
+        });
+
+        // Função para capturar os dados atuais
+        function obterDados() {
+            const data = {
+                tituloBMC: tituloEl.innerText.trim(),
+                quadrantes: {}
+            };
+            areas.forEach(block => {
+                const key = block.getAttribute('data-key');
+                data.quadrantes[key] = Array.from(block.querySelectorAll('li'))
+                                           .map(li => li.innerText.trim())
+                                           .filter(t => t !== "");
+            });
+            return data;
+        }
+
+        // SALVAR JSON
+        function salvarJSON() {
+            const data = obterDados();
+            const blob = new Blob([JSON.stringify(data, null, 4)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `BMC-${data.tituloBMC || 'sem-titulo'}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // CARREGAR JSON
+        function carregarJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Preenche Título
+                    tituloEl.innerText = data.tituloBMC || "";
+
+                    // Preenche Quadrantes
+                    areas.forEach(block => {
+                        const key = block.getAttribute('data-key');
+                        const items = data.quadrantes[key] || [];
+                        
+                        if (items.length > 0) {
+                            let html = "<ul>";
+                            items.forEach(item => { html += `<li>${item}</li>`; });
+                            html += "</ul>";
+                            block.innerHTML = html;
+                        } else {
+                            block.innerHTML = "";
+                        }
+                    });
+                } catch (err) {
+                    alert("Erro ao ler o arquivo JSON. Verifique se o formato está correto.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ""; // Reseta o input
+        }
+
+        function exportarPDF() {
+            const element = document.querySelector('.canvas-wrapper');
+            const opt = {
+                margin: 0,
+                filename: `BMC-${tituloEl.innerText.trim() || 'Modelo'}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
